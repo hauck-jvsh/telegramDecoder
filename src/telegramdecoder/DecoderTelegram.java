@@ -10,11 +10,19 @@ import dpf.ap.gpinf.interfacetelegram.ContactInterface;
 import dpf.ap.gpinf.interfacetelegram.DecoderTelegramInterface;
 import dpf.ap.gpinf.interfacetelegram.MessageInterface;
 import dpf.ap.gpinf.interfacetelegram.PhotoData;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import org.telegram.tgnet.SerializedData;
+import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.TLRPC.DocumentAttribute; 
 
@@ -257,6 +265,70 @@ public class DecoderTelegram implements DecoderTelegramInterface{
             return m.media.document.size;
         }
         return -1;
+    }
+     public static Connection createConnection(String database){
+         try {
+                Class.forName("org.sqlite.JDBC");
+                return DriverManager.getConnection("jdbc:sqlite:"+database);
+            } catch (Exception ex ) {
+                System.err.println(ex.toString());
+            }
+
+        return null;
+    }
+    public static Object load(byte[] data){
+        SerializedData s=new SerializedData(data);
+        int aux=s.readInt32(false);
+        return TLRPC.User.TLdeserialize(s,aux, false);
+        
+    }
+    
+    
+    
+    public static void main(String[] args){
+       Connection conn=createConnection("C:\\Users\\ADMHauck\\Documents\\dbtelegram\\ios\\db_sqlite");
+       
+       for(int i=7;i<=7;i++){
+           try{
+               String sql="SELECT * from t"+i;//" where HEX(value) like '%546d6a20746f64%'";
+               Statement stmt=conn.createStatement();
+               ResultSet rs=stmt.executeQuery(sql);
+               int k=0;
+               while(rs.next()){
+                    //System.out.println("t"+i);
+                    byte[] dados=rs.getBytes("value");
+                    PostBoxCoding p=new PostBoxCoding();
+                    p.setData(dados);
+                    int tam=p.readInt32(0x1C);
+                    k++;
+                    System.out.println("tam="+tam);
+                    if(tam>=dados.length){
+                        System.out.println("k="+k);
+                    }else{                        
+                        System.out.println(p.readString(0x20, tam));
+                    }
+               }
+              
+               
+               /*
+               
+               genericObj user=p.decodeObjectForKey("_");
+               p.setData(user.content);
+               System.out.println(p.decodeStringForKey("fn"));
+               System.out.println(p.decodeStringForKey("un"));
+               System.out.println(p.decodeStringForKey("p"));
+               List<genericObj> l= p.decodeObjectArrayForKey("ph");
+               for(genericObj ph:l){
+                   PostBoxCoding p2=new PostBoxCoding();
+                   p2.setData(ph.content);
+                   System.out.println("volume:"+p2.decodeInt64ForKey("v"));
+                   System.out.println("local:"+p2.decodeInt32ForKey("l"));
+               }
+               */
+           }catch(SQLException e){
+               //e.printStackTrace();
+           }
+       }
     }
     
 }
