@@ -285,50 +285,6 @@ public class DecoderTelegram implements DecoderTelegramInterface{
     
     
     
-    public static void main(String[] args){
-       Connection conn=createConnection("C:\\Users\\ADMHauck\\Documents\\dbtelegram\\ios\\db_sqlite");
-       
-       for(int i=7;i<=7;i++){
-           try{
-               String sql="SELECT * from t"+i;//" where HEX(value) like '%546d6a20746f64%'";
-               Statement stmt=conn.createStatement();
-               ResultSet rs=stmt.executeQuery(sql);
-               int k=0;
-               while(rs.next()){
-                    //System.out.println("t"+i);
-                    byte[] dados=rs.getBytes("value");
-                    PostBoxCoding p=new PostBoxCoding();
-                    p.setData(dados);
-                    int tam=p.readInt32(0x1C);
-                    k++;
-                    System.out.println("tam="+tam);
-                    if(tam>=dados.length){
-                        System.out.println("k="+k);
-                    }else{                        
-                        System.out.println(p.readString(0x20, tam));
-                    }
-               }
-              
-               
-               /*
-               
-               genericObj user=p.decodeObjectForKey("_");
-               p.setData(user.content);
-               System.out.println(p.decodeStringForKey("fn"));
-               System.out.println(p.decodeStringForKey("un"));
-               System.out.println(p.decodeStringForKey("p"));
-               List<genericObj> l= p.decodeObjectArrayForKey("ph");
-               for(genericObj ph:l){
-                   PostBoxCoding p2=new PostBoxCoding();
-                   p2.setData(ph.content);
-                   System.out.println("volume:"+p2.decodeInt64ForKey("v"));
-                   System.out.println("local:"+p2.decodeInt32ForKey("l"));
-               }
-               */
-           }catch(SQLException e){
-               //e.printStackTrace();
-           }
-       }
-    }
+    
     
 }

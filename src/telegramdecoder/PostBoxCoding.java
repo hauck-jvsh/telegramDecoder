@@ -6,9 +6,14 @@
 package telegramdecoder;
 
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 
 
 /**
@@ -173,6 +178,61 @@ public class PostBoxCoding {
             }
         }
         return l;
+    }
+    
+    
+    public static void main(String[] args){
+       Connection conn=DecoderTelegram.createConnection("D:\\telegram_ios\\db_sqlite");
+       
+       for(int i=7;i<=7;i++){
+           try{
+               String sql="SELECT * from t"+i;//" where HEX(value) like '%546d6a20746f64%'";
+               Statement stmt=conn.createStatement();
+               ResultSet rs=stmt.executeQuery(sql);
+               int k=0;
+               while(rs.next()){
+                    //System.out.println("t"+i);
+                    byte[] dados=rs.getBytes("value");
+                    PostBoxCoding p=new PostBoxCoding();
+                    p.setData(dados);
+                    long peerid=p.readInt32(0x1C-8);
+                    int tam=p.readInt32(0x1C);
+                    k++;
+                    System.out.println("tam="+tam);
+                    System.out.println("user id="+peerid);
+                    if(tam>=dados.length){
+                        System.out.println("k="+k);
+                    }else{
+                        
+                        String msg;
+                        if(tam>20)
+                            msg=p.readString(0x20, 20);
+                        else
+                            msg=p.readString(0x20, tam);
+                        System.out.println(msg);
+                    }
+               }
+              
+               
+               /*
+               
+               genericObj user=p.decodeObjectForKey("_");
+               p.setData(user.content);
+               System.out.println(p.decodeStringForKey("fn"));
+               System.out.println(p.decodeStringForKey("un"));
+               System.out.println(p.decodeStringForKey("p"));
+               List<genericObj> l= p.decodeObjectArrayForKey("ph");
+               for(genericObj ph:l){
+                   PostBoxCoding p2=new PostBoxCoding();
+                   p2.setData(ph.content);
+                   System.out.println("volume:"+p2.decodeInt64ForKey("v"));
+                   System.out.println("local:"+p2.decodeInt32ForKey("l"));
+               }
+               */
+           }catch(SQLException e){
+               //e.printStackTrace();
+           }
+       }
     }
     
 }
