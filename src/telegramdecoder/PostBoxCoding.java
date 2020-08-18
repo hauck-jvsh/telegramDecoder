@@ -6,9 +6,17 @@
 package telegramdecoder;
 
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.Formatter;
 import java.util.List;
+
 
 
 /**
@@ -44,12 +52,23 @@ public class PostBoxCoding {
     private int offset=0;
     
     public int readInt32(int start) {
+        return readInt32(start,true);
+    }
+     public long readInt64(int start) {
+        return readInt64(start,true);
+    }
+    public int readInt32(int start, boolean bigEndian) {
         try {
             int i = 0;
-            for (int j = 0; j < 4; j++) {
+            byte len=4;
+            for (int j = 0; j < len; j++) {
                 int a=data[start+j];
                 a=a&0xFF;
-                i |= (a << (j * 8));
+                if(bigEndian){
+                    i |= (a << (j * 8));
+                }else{
+                    i |= (a << ((len-j-1) * 8));
+                }
             }
             return i;
         } catch (Exception e) {
@@ -59,13 +78,18 @@ public class PostBoxCoding {
         return 0;
     }
     
-    public long readInt64(int start) {
+    public long readInt64(int start, boolean bigEndian) {
         try {
             long i = 0;
-            for (int j = 0; j < 8; j++) {
+            byte len=8;
+            for (int j = 0; j < len; j++) {
                 int a=data[start+j];
                 a=a&0xFF;
-                i |= (a << (j * 8));
+                if(bigEndian){
+                    i |= (a << (j * 8));
+                }else{
+                    i |= (a << ((len-j-1) * 8));
+                }
             }
             return i;
         } catch (Exception e) {
@@ -173,6 +197,63 @@ public class PostBoxCoding {
             }
         }
         return l;
+    }
+     public static void main(String[] args){
+       Connection conn=DecoderTelegram.createConnection("C:\\Users\\ADMHauck\\Documents\\dbtelegram\\ios\\db_sqlite");
+       
+       for(int i=7;i<=7;i++){
+           try{
+               String sql="SELECT * from t"+i;//" where HEX(value) like '%546d6a20746f64%'";
+               Statement stmt=conn.createStatement();
+               ResultSet rs=stmt.executeQuery(sql);
+               int k=0;
+               while(rs.next()){
+                    //System.out.println("t"+i);
+                    byte[] dados=rs.getBytes("value");
+                    PostBoxCoding p=new PostBoxCoding(),p2=new PostBoxCoding();
+                    p.setData(dados);
+                    long peer=p.readInt64(0x1c-8);
+                    p2.setData(rs.getBytes("key"));
+                    long peer2=p2.readInt64(0, false);
+                    int namespace=p2.readInt32(8,false);
+                    int timestamp=p2.readInt32(12,false);
+                    
+                    int tam=p.readInt32(0x1C);
+                    k++;
+                    if(tam<dados.length){
+                        System.out.println("timestamp="+timestamp);
+                        System.out.println("peer="+peer);
+                        System.out.println("peer2="+peer2);
+                        System.out.println("tam="+tam);
+                    }
+                    /*if(tam>=dados.length){
+                        System.out.println("k="+k);
+                    }else{                        
+                        System.out.println(p.readString(0x20, tam));
+                    }
+                    */
+               }
+              
+               
+               /*
+               
+               genericObj user=p.decodeObjectForKey("_");
+               p.setData(user.content);
+               System.out.println(p.decodeStringForKey("fn"));
+               System.out.println(p.decodeStringForKey("un"));
+               System.out.println(p.decodeStringForKey("p"));
+               List<genericObj> l= p.decodeObjectArrayForKey("ph");
+               for(genericObj ph:l){
+                   PostBoxCoding p2=new PostBoxCoding();
+                   p2.setData(ph.content);
+                   System.out.println("volume:"+p2.decodeInt64ForKey("v"));
+                   System.out.println("local:"+p2.decodeInt32ForKey("l"));
+               }
+               */
+           }catch(SQLException e){
+               //e.printStackTrace();
+           }
+       }
     }
     
 }
