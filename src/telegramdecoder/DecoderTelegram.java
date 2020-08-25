@@ -80,52 +80,14 @@ public class DecoderTelegram implements DecoderTelegramInterface{
         if (m!=null && message!=null ) {
             message.setFromMe(m.out);
             if(m.action!=null) {
+                    message.setType(m.action.getClass().getSimpleName());
+                    
                     if(m.action.call!=null) {
-                            message.setType("call duration:"+m.action.duration);
-                    }
-                    if(m.action instanceof TLRPC.TL_messageActionChatJoinedByLink) {
-                            message.setType("User Join chat by link");
-                    }
-                    if(m.action instanceof TLRPC.TL_messageActionChatAddUser) {
-                            message.setType("Chat Add User");
-                    }
-                    if(m.action instanceof TLRPC.TL_messageActionUserJoined) {
-                            message.setType("User Join");
-                    }
-                    if(m.action instanceof TLRPC.TL_messageActionHistoryClear) {
-                            message.setType("History Clear");
-                    }
-                    if(m.action instanceof TLRPC.TL_messageActionChatDeleteUser) {
-                            message.setType("User deleted");
-                    }
-                    if(m.action instanceof TLRPC.TL_messageActionChannelCreate) {
-                            message.setType("Channel created");
-                    }
-                    if(m.action instanceof TLRPC.TL_messageActionUserUpdatedPhoto) {
-                            message.setType("User update photo");
-                    }
-                    if(m.action instanceof TLRPC.TL_messageActionChatEditPhoto) {
-                            message.setType("Chat update photo");
-                    }
-                    if(m.action instanceof TLRPC.TL_messageActionChatDeletePhoto) {
-                            message.setType("Chat delete photo");
-                    }
+                            message.setType(message.getType()+":"+m.action.duration);
+                    }                    
+                   
                     if(m.action instanceof TLRPC.TL_messageActionChatEditTitle) {   	                        		
-                            message.setType("Change title to "+m.action.title);
-                    }
-                    if(m.action instanceof TLRPC.TL_messageActionContactSignUp) {
-                            message.setType("Contact sign up");
-                    }
-                    if(m.action instanceof TLRPC.TL_messageActionChatMigrateTo) {
-                            message.setType("Chat migrate");
-                    }
-                    if(m.action instanceof TLRPC.TL_messageActionPinMessage) {
-                            message.setType("Message pinned");
-                    }
-
-                    if(message.getType()==null) {
-                            message.setType(m.action.getClass().getSimpleName());
-                            System.out.println("tipo desconhecido");
+                            message.setType(message.getType()+":"+m.action.title);
                     }
 
             }
@@ -285,6 +247,6 @@ public class DecoderTelegram implements DecoderTelegramInterface{
     
     
     
-   
+    
     
 }

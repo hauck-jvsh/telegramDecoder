@@ -2,6 +2,11 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/C:/Users/SETEC1/Documents/telegramDecoder/src/telegramdecoder/Photo.java</file>
+            <file>file:/C:/Users/SETEC1/Documents/telegramDecoder/src/org/telegram/tgnet/TLRPC.java</file>
+            <file>file:/C:/Users/SETEC1/Documents/telegramDecoder/src/telegramdecoder/DecoderTelegram.java</file>
+            <file>file:/C:/Users/SETEC1/Documents/telegramDecoder/src/org/telegram/tgnet/SerializedData.java</file>
+        </group>
     </open-files>
 </project-private>
