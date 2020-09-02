@@ -69,8 +69,16 @@ public class DecoderTelegram implements DecoderTelegramInterface{
     
     public int getRemetenteId(){
         if(m!=null){
-            return m.from_id;
-        }
+            if(m.from_id!=0){
+                return m.from_id;
+            }
+            if(m instanceof TLRPC.TL_message){
+                TLRPC.TL_message tl_m=(TLRPC.TL_message)m;
+                if(tl_m.via_bot_id!=0){
+                    return tl_m.via_bot_id;
+                }                  
+            }
+        }        
         return 0;
     }
 
