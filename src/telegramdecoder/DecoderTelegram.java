@@ -10,6 +10,7 @@ import dpf.ap.gpinf.interfacetelegram.ContactInterface;
 import dpf.ap.gpinf.interfacetelegram.DecoderTelegramInterface;
 import dpf.ap.gpinf.interfacetelegram.MessageInterface;
 import dpf.ap.gpinf.interfacetelegram.PhotoData;
+import java.lang.reflect.Field;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -21,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
@@ -35,6 +38,7 @@ public class DecoderTelegram implements DecoderTelegramInterface{
     TLRPC.Message m=null;
     TLRPC.User u=null;
     TLRPC.Chat c=null;
+    TLRPC.ChatFull cf=null;
     @Override
     public void setDecoderData(byte[] data,int TYPE) {
         SerializedData s=new SerializedData(data);
@@ -50,6 +54,9 @@ public class DecoderTelegram implements DecoderTelegramInterface{
         }
         if(TYPE==CHAT){
             c=TLRPC.Chat.TLdeserialize(s, aux, false);
+            if(c==null){
+                cf=TLRPC.ChatFull.TLdeserialize(s, aux, false);
+            }
         }
         
     }
@@ -81,33 +88,64 @@ public class DecoderTelegram implements DecoderTelegramInterface{
         }        
         return 0;
     }
+    private String objToString(Object o){
+        Class<?> c=o.getClass();
+        StringBuilder sb=new StringBuilder();
+        while(c!=null){
+        Field[] fields = c.getDeclaredFields();
+            for (Field field : fields) {
+                try {
+                    sb.append(field.getName()).append(" - ").append(field.get(o));
+                    sb.append("\n");
+                }catch (IllegalArgumentException | IllegalAccessException ex) {
+                    //ignore
+                }
+            }
+            c=c.getSuperclass();
+            
+        }
+        return sb.toString();
+    }
 
     @Override
     public void getMessageData(MessageInterface message) {
        
         if (m!=null && message!=null ) {
+            
             message.setFromMe(m.out);
+            message.setData(m.message);
+            
             if(m.action!=null) {
                     message.setType(m.action.getClass().getSimpleName());
                     
-                    if(m.action.call!=null) {
+                    if(m.action.call_id!=0) {
                             message.setType(message.getType()+":"+m.action.duration);
                     }                    
                    
                     if(m.action instanceof TLRPC.TL_messageActionChatEditTitle) {   	                        		
                             message.setType(message.getType()+":"+m.action.title);
                     }
+                    if(m.action instanceof TLRPC.TL_messageActionChatAddUser ){
+                        if(m.action.users!=null){
+                            String ids="";
+                            boolean first=true;
+                            for(int id:m.action.users){
+                                if(first){
+                                    ids+="Ids ";
+                                    first=false;
+                                }else{
+                                    ids+=", ";
+                                }
+                                ids+=id;
+                            }
+                            message.setData(ids);
+                        }
+                    }
 
             }
-
-
-            
-
-
-
-
-            message.setData(m.message);
-
+            if(m.to_id!=null){
+                message.setToId(m.to_id.user_id);
+            }
 
             message.setTimeStamp(Date.from(Instant.ofEpochSecond(m.date)));
             //message.timeStamp=LocalDateTime.ofInstant(Instant.ofEpochSecond(), ZoneId.systemDefault())
@@ -143,6 +181,7 @@ public class DecoderTelegram implements DecoderTelegramInterface{
             chat.setName(c.title);
             chat.setLastName(null);
             chat.setPhone(null);
+            
         }
         
     }
@@ -251,6 +290,19 @@ public class DecoderTelegram implements DecoderTelegramInterface{
         int aux=s.readInt32(false);
         return TLRPC.User.TLdeserialize(s,aux, false);
         
+    }
+
+    @Override
+    public long[] getParticipants() {
+        if(cf!=null&& cf.participants!=null && cf.participants.participants!=null){
+            long[] pr=new long[cf.participants.participants.size()];
+            int i=0;
+            for(TLRPC.ChatParticipant p:cf.participants.participants){
+                pr[i++]=p.user_id;
+            }
+            return pr;
+        }
+        return null;
     }
     
     
