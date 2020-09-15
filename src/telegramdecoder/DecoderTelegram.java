@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.xml.bind.DatatypeConverter;
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
@@ -54,9 +55,12 @@ public class DecoderTelegram implements DecoderTelegramInterface{
         }
         if(TYPE==CHAT){
             c=TLRPC.Chat.TLdeserialize(s, aux, false);
-            if(c==null){
-                cf=TLRPC.ChatFull.TLdeserialize(s, aux, false);
-            }
+            s=new SerializedData(data);
+            aux=s.readInt32(false);
+            
+            cf=TLRPC.ChatFull.TLdeserialize(s, aux, false);
+            
+            
         }
         
     }
@@ -110,7 +114,9 @@ public class DecoderTelegram implements DecoderTelegramInterface{
     @Override
     public void getMessageData(MessageInterface message) {
        
-        if (m!=null && message!=null ) {
+        if(message==null)
+            return;
+        if (m!=null) {
             
             message.setFromMe(m.out);
             message.setData(m.message);
@@ -151,24 +157,68 @@ public class DecoderTelegram implements DecoderTelegramInterface{
             //message.timeStamp=LocalDateTime.ofInstant(Instant.ofEpochSecond(), ZoneId.systemDefault())
             if(m.media!=null) {
                 if(m.media.document!=null) {
+                    if(m.media.document instanceof TLRPC.TL_documentEmpty){
+                        message.setData(message.getData()+" Empty media");
+                    }
                     message.setMediaMime(m.media.document.mime_type);
-                }
-
+                }else
                 if(m.media.photo!=null){
                     message.setMediaMime("image/jpeg");
 
-                }
+                }else
                 if(m.media.webpage!=null) {
                     message.setLink(true);
                     message.setMediaMime("link");
 
+                }else
+                if(m.media.description!=null){
+                    message.setData(message.getData()+"<br/> Desc"+m.media.description);
+                }else
+                if(m.media.game!=null){
+                    message.setData(message.getData()+"<br/> Game"+m.media.game.title);
+                }else
+                if(m.media.geo!=null){
+                    message.setData(message.getData()+"<br/> Geo long:"+m.media.geo._long + " lat:"+m.media.geo.lat);
+                }else                
+                if(m.media.vcard!=null){
+                    message.setData(message.getData()+"<br/> Vcard"+m.media.vcard);
+                }else
+                if(m.media.phone_number!=null){
+                    message.setData(message.getData()+"<br/> phone"+m.media.phone_number);
+                }else
+                if(m.media instanceof TLRPC.TL_messageMediaEmpty){
+                    message.setData(message.getData()+"<br/> Empty media");
+                }else
+                if(m.media instanceof TLRPC.TL_messageMediaPoll){
+                    TLRPC.TL_messageMediaPoll mpool=(TLRPC.TL_messageMediaPoll)m.media;
+                    String text = "pool: " + mpool.poll.question;
+                    for(TLRPC.TL_pollAnswer a:mpool.poll.answers){
+                       text += "<br/>" +  a.text;
+                    }
+                    if (message.getData() != null) {
+                        text = message.getData() + "<br/>" + text;
+                    }
+                    message.setData(text);
+                    
                 }
 
-
             }
+            
+            if(m instanceof TLRPC.TL_messageEmpty){
+                message.setData("Empty message");
+            }
+            
 
+        }else{
+            message.setData("unknow msg for decode");
         }
-        //System.out.println(m.message);
+        if(message.getMediaMime()==null && message.getType()==null && (message.getData()==null || message.getData().isEmpty()) ){
+            if(m.media!=null){
+                System.out.println(objToString(m.media));
+            }else{
+                System.out.println(objToString(m));
+            }
+        }
 
     	                
     }
@@ -292,18 +342,7 @@ public class DecoderTelegram implements DecoderTelegramInterface{
         
     }
 
-    @Override
-    public long[] getParticipants() {
-        if(cf!=null&& cf.participants!=null && cf.participants.participants!=null){
-            long[] pr=new long[cf.participants.participants.size()];
-            int i=0;
-            for(TLRPC.ChatParticipant p:cf.participants.participants){
-                pr[i++]=p.user_id;
-            }
-            return pr;
-        }
-        return null;
-    }
+    
     
     
     
