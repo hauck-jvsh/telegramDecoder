@@ -178,7 +178,9 @@ public class DecoderTelegram implements DecoderTelegramInterface{
                     message.setData(message.getData()+"<br/> Game"+m.media.game.title);
                 }else
                 if(m.media.geo!=null){
-                    message.setData(message.getData()+"<br/> Geo long:"+m.media.geo._long + " lat:"+m.media.geo.lat);
+                    message.setLatitude(m.media.geo.lat);
+                    message.setLongitude(m.media.geo._long);
+                    message.setMediaMime("geo");
                 }else                
                 if(m.media.vcard!=null){
                     message.setData(message.getData()+"<br/> Vcard"+m.media.vcard);
