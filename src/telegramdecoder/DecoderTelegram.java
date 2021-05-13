@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.xml.bind.DatatypeConverter;
+
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
@@ -80,8 +80,14 @@ public class DecoderTelegram implements DecoderTelegramInterface{
     
     public int getRemetenteId(){
         if(m!=null){
-            if(m.from_id!=0){
-                return m.from_id;
+            if(m.from_id.user_id!=0){
+                return m.from_id.user_id;
+            }
+            if(m.from_id.chat_id!=0){
+                return m.from_id.chat_id;
+            }
+            if(m.from_id.channel_id!=0){
+                return m.from_id.channel_id;
             }
             if(m instanceof TLRPC.TL_message){
                 TLRPC.TL_message tl_m=(TLRPC.TL_message)m;
@@ -149,8 +155,8 @@ public class DecoderTelegram implements DecoderTelegramInterface{
                     }
 
             }
-            if(m.to_id!=null){
-                message.setToId(m.to_id.user_id);
+            if(m.peer_id!=null){
+                message.setToId(m.peer_id.user_id);
             }
 
             message.setTimeStamp(Date.from(Instant.ofEpochSecond(m.date)));
