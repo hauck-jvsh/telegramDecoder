@@ -333,7 +333,7 @@ public class DecoderTelegram implements DecoderTelegramInterface{
         }
         return -1;
     }
-     public static Connection createConnection(String database){
+    public static Connection createConnection(String database){
          try {
                 Class.forName("org.sqlite.JDBC");
                 return DriverManager.getConnection("jdbc:sqlite:"+database);
