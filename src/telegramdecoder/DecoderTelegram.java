@@ -78,7 +78,8 @@ public class DecoderTelegram implements DecoderTelegramInterface{
         }
     }
     
-    public int getRemetenteId(){
+    @Override
+    public long getRemetenteId(){
         if(m!=null){
             if(m.from_id.user_id!=0){
                 return m.from_id.user_id;
@@ -141,7 +142,7 @@ public class DecoderTelegram implements DecoderTelegramInterface{
                         if(m.action.users!=null){
                             String ids="";
                             boolean first=true;
-                            for(int id:m.action.users){
+                            for(long id:m.action.users){
                                 if(first){
                                     ids+="Ids ";
                                     first=false;
@@ -327,7 +328,7 @@ public class DecoderTelegram implements DecoderTelegramInterface{
     }
 
     @Override
-    public int getDocumentSize() {
+    public long getDocumentSize() {
         if(m!=null && m.media!=null && m.media.document!=null){
             return m.media.document.size;
         }

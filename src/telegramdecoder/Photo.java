@@ -13,21 +13,21 @@ import dpf.ap.gpinf.interfacetelegram.PhotoData;
  */
 public class Photo implements PhotoData{
     private String name=null;
-    private int size=0;
+    private long size=0;
     @Override
     public String getName() {
         return name;
     }
 
     @Override
-    public int getSize() {
+    public long getSize() {
         return size;
     }
     
     public void setName(String name){
         this.name=name;
     }
-    public void setSize(int size){
+    public void setSize(long size){
         this.size=size;
     }
     
