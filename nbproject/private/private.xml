@@ -4,6 +4,7 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/C:/Users/HAUCK/git/telegramDecoder/src/telegramdecoder/DecoderTelegram.java</file>
+            <file>file:/C:/Users/HAUCK/git/telegramDecoder/src/org/telegram/tgnet/TLClassStore.java</file>
             <file>file:/C:/Users/HAUCK/git/telegramDecoder/src/org/telegram/tgnet/TLRPC.java</file>
             <file>file:/C:/Users/HAUCK/git/telegramDecoder/src/telegramdecoder/Photo.java</file>
             <file>file:/C:/Users/HAUCK/git/telegramDecoder/src/org/telegram/tgnet/RequestTimeDelegate.java</file>

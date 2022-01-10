@@ -132,11 +132,18 @@ public class DecoderTelegram implements DecoderTelegramInterface{
                     message.setType(m.action.getClass().getSimpleName());
                     
                     if(m.action.call_id!=0) {
-                            message.setType(message.getType()+":"+m.action.duration);
-                    }                    
+                        message.setType(message.getType()+":"+m.action.duration);
+                    }
+                    if(m.action instanceof TLRPC.TL_messageActionSetMessagesTTL){
+                        TLRPC.TL_messageActionSetMessagesTTL aux=(TLRPC.TL_messageActionSetMessagesTTL)m.action;
+                        message.setType(message.getType()+": "+aux.period + "s");
+                    }
+                    if(m.action instanceof TLRPC.TL_messageActionTTLChange) {
+                        message.setType(message.getType()+": "+m.action.ttl + "s");
+                    }
                    
                     if(m.action instanceof TLRPC.TL_messageActionChatEditTitle) {   	                        		
-                            message.setType(message.getType()+":"+m.action.title);
+                        message.setType(message.getType()+":"+m.action.title);
                     }
                     if(m.action instanceof TLRPC.TL_messageActionChatAddUser ){
                         if(m.action.users!=null){
